@@ -5,7 +5,8 @@
   "main": "kamino-alert.js",
   "scripts": {
     "start-bot": "node bot.js",
-    "start-scheduler": "node scheduler.js"
+    "start-scheduler": "node scheduler.js",
+    "start-peg-alert": "node peg-alert.js"
   },
   "keywords": [],
   "author": "",

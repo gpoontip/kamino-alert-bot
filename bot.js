@@ -24,3 +24,9 @@ bot.onText(/\/(yield|status)/, async (msg) => {
 
   bot.sendMessage(chatId, message, { parse_mode: "Markdown" });
 });
+
+bot.onText(/\/(peg|pegstatus)/, async (msg) => {
+  const chatId = msg.chat.id;
+  const { text } = await getPegStatus();
+  bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
+});
