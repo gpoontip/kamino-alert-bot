@@ -15,11 +15,17 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const JITOSOL_ADDRESS = "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn";
 const SOL_ADDRESS = "So11111111111111111111111111111111111111112";
 
+const MAX_DEPEG_PCT = process.env.MAX_DEPEG_PCT;
+const LIQUIDATION_PEG = process.env.LIQUIDATION_PEG;
+
 const BIRDEYE_API_KEY = process.env.BIRDEYE_API_KEY;
-const headers = {
-  "x-chain": "solana",
-  accept: "application/json",
-  "X-API-KEY": BIRDEYE_API_KEY,
+const options = {
+  method: "GET",
+  headers: {
+    "x-chain": "solana",
+    accept: "application/json",
+    "X-API-KEY": BIRDEYE_API_KEY,
+  },
 };
 
 // === Fetch JitoSOL Staking Yield ===
@@ -81,7 +87,7 @@ const getTokenPrice = async (address) => {
 
   while (attempts < 5) {
     try {
-      const res = await axios.get(url, { headers });
+      const res = await axios.get(url, options);
       return res.data?.data?.value;
     } catch (err) {
       if (err.response?.status === 429) {
