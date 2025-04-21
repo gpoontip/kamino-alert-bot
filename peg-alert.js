@@ -13,6 +13,4 @@ const checkPeg = async () => {
   }
 };
 
-// Run immediately and every 5 minutes
 checkPeg();
-setInterval(checkPeg, 5 * 60 * 1000);

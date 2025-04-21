@@ -1,0 +1,32 @@
+# .github/workflows/peg-monitor.yml
+
+name: 🧭 jitoSOL Peg Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  peg-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run jitoSOL Peg Checker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BIRDEYE_API_KEY: ${{ secrets.BIRDEYE_API_KEY }}
+          LIQUIDATION_PEG: ${{ secrets.LIQUIDATION_PEG }}
+          MAX_DEPEG_PCT: ${{ secrets.MAX_DEPEG_PCT }}
+        run: node peg-alert.js
