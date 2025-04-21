@@ -114,16 +114,16 @@ const getPegStatus = async () => {
     const proximityPct = (distanceFromLiquidation / LIQUIDATION_PEG) * 100;
 
     const statusMsg =
-      `📊 *jitoSOL Peg Status*\n\n` +
-      `🟦 jitoSOL: *$${jitoSolUsd.toFixed(2)}*\n` +
-      `🟥 SOL: *$${solUsd.toFixed(2)}*\n` +
-      `🔁 Peg Ratio: *${pegRatio.toFixed(4)} SOL*\n` +
-      `📉 Distance from Liquidation (${LIQUIDATION_PEG}): *${proximityPct.toFixed(
+      `📊 jitoSOL Peg Status\n\n` +
+      `🟦 jitoSOL: $${jitoSolUsd.toFixed(2)}\n` +
+      `🟥 SOL: $${solUsd.toFixed(2)}\n` +
+      `🔁 Peg Ratio: ${pegRatio.toFixed(4)} SOL\n` +
+      `📉 Distance from Liquidation (${LIQUIDATION_PEG}): ${proximityPct.toFixed(
         2
-      )}%*\n\n` +
+      )}%\n\n` +
       (proximityPct <= MAX_DEPEG_PCT
-        ? `⚠️ *Danger:* Within ${MAX_DEPEG_PCT}% of liquidation!`
-        : `✅ *Safe:* Outside liquidation danger zone.`);
+        ? `⚠️ Danger: Within ${MAX_DEPEG_PCT}% of liquidation!`
+        : `✅ Safe: Outside liquidation danger zone.`);
 
     return {
       text: statusMsg,
