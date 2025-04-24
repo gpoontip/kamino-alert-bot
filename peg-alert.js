@@ -13,6 +13,7 @@ const checkPeg = async () => {
     console.log(latest);
   } else {
     console.log(text);
+    throw new Error(text);
   }
   if (pegRatio && proximityPct <= MAX_DEPEG_PCT) {
     await sendTelegramAlert(text);
