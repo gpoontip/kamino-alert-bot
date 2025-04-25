@@ -4,7 +4,7 @@ name: 🧭 jitoSOL Peg Monitor
 
 on:
   schedule:
-    - cron: "*/30 * * * *" # every 5 minutes
+    - cron: "*/30 * * * *" # every 30 minutes
   workflow_dispatch:
 
 jobs:

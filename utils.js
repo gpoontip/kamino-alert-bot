@@ -4,7 +4,6 @@ require("dotenv").config();
 
 const MARKET_PUBKEY = "7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF";
 const SOL_RESERVE_PUBKEY = "d4A2prbA2whesmvHaL88BH6Ewn5N4bTSU2Ze8P6Bc4Q";
-const JITO_MINT = "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn";
 const CLUSTER = "mainnet-beta";
 const FREQUENCY = "hour";
 
@@ -34,7 +33,7 @@ async function fetchJitoSOLStakingAPY() {
   const end = now.toISOString();
   const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days ago
 
-  const url = `https://api.kamino.finance/staking-yields/tokens/${JITO_MINT}/history?start=${start}&end=${end}`;
+  const url = `https://api.kamino.finance/staking-yields/tokens/${JITOSOL_ADDRESS}/history?start=${start}&end=${end}`;
 
   try {
     const response = await axios.get(url);
@@ -103,7 +102,7 @@ const getTokenPrice = async (address) => {
   throw new Error("❌ Failed to fetch price after 5 attempts");
 };
 
-const getPegStatus = async () => {
+const getPegStatusViaBirdeye = async () => {
   try {
     const jitoSolUsd = await getTokenPrice(JITOSOL_ADDRESS);
     await sleep(1000);
@@ -130,6 +129,53 @@ const getPegStatus = async () => {
       pegRatio,
       proximityPct,
     };
+  } catch (err) {
+    return {
+      text: `❌ Error fetching peg status: ${err.message}`,
+      pegRatio: null,
+      proximityPct: null,
+    };
+  }
+};
+
+const getPegStatus = async () => {
+  try {
+    const amount = 1_000_000_000; // 1 jitoSOL (9 decimals)
+
+    // 1. Fetch jitoSOL → SOL ratio from Jupiter
+    const quoteUrl = `https://quote-api.jup.ag/v6/quote?inputMint=${JITOSOL_ADDRESS}&outputMint=${SOL_ADDRESS}&amount=${amount}`;
+    const quoteRes = await axios.get(quoteUrl);
+    const outAmount = parseFloat(quoteRes.data.outAmount) / 1_000_000_000;
+
+    const pegRatio = outAmount;
+
+    // 2. Get SOL/USD from CoinGecko
+    const solPriceRes = await axios.get(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+    );
+    const solUsd = solPriceRes.data.solana.usd;
+    const jitoSolUsd = pegRatio * solUsd;
+
+    // 3. Calculate liquidation proximity
+    const LIQUIDATION_PEG = parseFloat(process.env.LIQUIDATION_PEG || "0.95");
+    const MAX_DEPEG_PCT = parseFloat(process.env.MAX_DEPEG_PCT || "5");
+
+    const distance = pegRatio - LIQUIDATION_PEG;
+    const proximityPct = (distance / LIQUIDATION_PEG) * 100;
+
+    const text =
+      `📊 jitoSOL Peg Status\n\n` +
+      `🟦 jitoSOL: $${jitoSolUsd.toFixed(2)}\n` +
+      `🟥 SOL: $${solUsd.toFixed(2)}\n` +
+      `🔁 Peg Ratio: ${pegRatio.toFixed(4)} SOL\n` +
+      `📉 Distance from Liquidation (${LIQUIDATION_PEG}): ${proximityPct.toFixed(
+        2
+      )}%\n\n` +
+      (proximityPct <= MAX_DEPEG_PCT
+        ? `⚠️ Danger: Within ${MAX_DEPEG_PCT}% of liquidation!`
+        : `✅ Safe: Outside liquidation danger zone.`);
+
+    return { text, pegRatio, proximityPct };
   } catch (err) {
     return {
       text: `❌ Error fetching peg status: ${err.message}`,
